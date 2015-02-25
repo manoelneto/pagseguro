@@ -36,8 +36,6 @@ module PagSeguro
   class << self
     # Delegates some calls to the config object
     extend Forwardable
-    def_delegators :configuration, :email, :receiver_email, :token
-    def_delegators :configuration, :email=, :receiver_email=, :token=
 
     # The encoding that will be used.
     attr_accessor :encoding
@@ -45,6 +43,10 @@ module PagSeguro
     # The PagSeguro environment.
     # +production+ or +sandbox+.
     attr_accessor :environment
+
+    attr_accessor :email
+    attr_accessor :token
+    attr_accessor :receiver_email
   end
 
   self.encoding = "UTF-8"
@@ -70,23 +72,6 @@ module PagSeguro
     root = uris.fetch(environment.to_sym) { raise InvalidEnvironmentError }
     root[type.to_sym]
   end
-
-  # The configuration intance for the thread
-  def self.configuration
-    Thread.current[:pagseguro_config] ||= PagSeguro::Config.new
-  end
-
-  # Set the global configuration.
-  #
-  #   PagSeguro.configure do |config|
-  #     config.email = "john@example.com"
-  #     config.token = "abc"
-  #   end
-  #
-  def self.configure(&block)
-    yield configuration
-  end
-
   # The API endpoint.
   def self.api_url(path)
     File.join(root_uri(:api), path)
